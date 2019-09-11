@@ -3,6 +3,8 @@
 ## HEAD
 - `x/msgfee` was extended to provide a message to set a fee for a given message path.
 `bnscli` and `bnsd` were extended to support this change.
+- `orm`: implement `SerialModelBucket` that provides a better API to interact with datastore.
+- `migration`: implement migration for `SerialModelBucket`.
 
 Breaking changes
 
@@ -11,6 +13,8 @@ Breaking changes
   `orm.Model` interface, which is a subset of `orm.Cloneable`.
   When creating a new bucket instance a model instance must be provided instead
   of `orm.SimpleObj`.
+- `CounterWithID` field has been added to `codec.proto` as an helper for 
+testing `SerialModelBucket`
 
 ## 0.21.0
 - `x/batch`: increase maximum number of messages to 15
