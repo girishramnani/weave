@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package starname;
+
+import "codec.proto";
+import "gogoproto/gogo.proto";
+
+
+
+// Starname represents an entity that is known to the user as `*<label>` string.
+// It maps to any number of blokchain addresses. In additiona a starname can
+// contain any number of names in format `<name>*<label>` that link
+// themselves to blockchain addresses as well.
+//
+// A starname is a superset of a name. In addition to resolving to blockchain
+// addresses, it is a container for any number of names.
+//
+// For example, if I register a starname `*alice`, I can create names within
+// this starname, each containing different blockchain references.
+//
+//      *alice -> ETH address_1 and BTC address_1
+//  work*alice -> ETH address_2 and IOV address_1
+//  home*alice -> BTC address_1
+//   fun*alice -> DOGE address_1 and IOV address_2
+//
+// Owner of the startname controls the names within the starname.
+message Starname {
+  weave.Metadata metadata = 1;
+  // Owner is a weave.Address that controls this starname.
+  bytes owner = 2 [(gogoproto.casttype) = "github.com/iov-one/weave.Address"];
+  string label = 3;
+  repeated BlockchainAddress targets = 4 [(gogoproto.nullable) = false];
+}
+
+
+// Name contains a reference to blockchain addresses. It belongs to a starname
+// and it is controlled by the starname owner.
+// Name consist of two parts - starname label and name label. Together those
+// two parts form a string that resolves to this name:
+// `<name_label>*<starname_label>`, for example `work*alice` or `home*alice`.
+// Name label must not be empty.
+message Name {
+  weave.Metadata metadata = 1;
+  string starname_label = 2;
+  string label = 2;
+  repeated BlockchainAddress targets = 3 [(gogoproto.nullable) = false];
+}
+
+// BlockchainAddress represents a blochain address. This structure clubs together
+// blokchain ID together with an address on that network. It is used to point
+// to an address on any blockchain network.
+message BlockchainAddress {
+  // An arbitrary blockchain ID.
+  string blockchain_id = 1 [(gogoproto.customname) = "BlockchainID"];
+  // An address on the specified blockchain network. Address is not a
+  // weave.Address as we cannot know what is the format of an address on the
+  // chain that this token instance links to. Because we do not know the rules
+  // to validate an address for any blockchain ID, this is an arbitrary bulk of
+  // data.
+  // It is more convinient to always use encoded representation of each address
+  // and store it as a string. Using bytes while compact is not as comfortable
+  // to use.
+  string address = 2;
+}
+
+
+// Configuration is a dynamic configuration used by this extension, managed by
+// the functionality provided by gconf package.
+message Configuration {
+  weave.Metadata metadata = 1;
+  // Owner is present to implement gconf.OwnedConfig interface
+  // This defines the Address that is allowed to update the Configuration object and is
+  // needed to make use of gconf.NewUpdateConfigurationHandler
+  bytes owner = 2 [(gogoproto.casttype) = "github.com/iov-one/weave.Address"];
+  // Valid starname label defines a regular expression that every valid
+  // starname must match. Rule must not include the initial asterisk (*)
+  // character.
+  string valid_starname_label = 3;
+  // Valid name label defines a regular expression that every valid name label
+  // must match (a name is `<name_label>*<starname_label>`).
+  string valid_name_label = 4;
+}
+
+// UpdateConfigurationMsg is used by the gconf extension to update the
+// configuration.
+message UpdateConfigurationMsg {
+  weave.Metadata metadata = 1;
+  Configuration patch = 2;
+}
