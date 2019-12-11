@@ -12,7 +12,8 @@ import (
 
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave/app"
-	account "github.com/iov-one/weave/cmd/bnsd/x/account"
+	"github.com/iov-one/weave/cmd/bnsd/x/account"
+	"github.com/iov-one/weave/cmd/bnsd/x/preregistration"
 	"github.com/iov-one/weave/cmd/bnsd/x/username"
 	"github.com/iov-one/weave/coin"
 	"github.com/iov-one/weave/commands/server"
@@ -94,6 +95,7 @@ func Router(authFn x.Authenticator, issuer weave.Address) *app.Router {
 	msgfee.RegisterRoutes(r, authFn)
 	datamigration.RegisterRoutes(r, authFn)
 	account.RegisterRoutes(r, authFn)
+	preregistration.RegisterRoutes(r, authFn)
 	return r
 }
 
